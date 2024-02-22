@@ -1,0 +1,53 @@
+﻿@page "/"
+@using LaytonYSAClerk.Data
+@using LaytonYSAClerk.Cli
+@inject RecordDataService RecordDataService
+
+<PageTitle>Index</PageTitle>
+
+<MatTable Items="@GetRecords()" PageSize="500">
+    <MatTableHeader>
+        <th>@(nameof(MergedRecord.Fullname))</th>
+        <th>@(nameof(MergedRecord.Pulled))</th>
+        <th>@(nameof(MergedRecord.PulledTimestamp))</th>
+        <th>@(nameof(MergedRecord.Birthday))</th>
+        <th>@(nameof(MergedRecord.Email))</th>
+        <th>@(nameof(MergedRecord.Phone))</th>
+        <th>@(nameof(MergedRecord.Address))</th>
+        <th>@(nameof(MergedRecord.ApartmentNumber))</th>
+        <th>@(nameof(MergedRecord.City))</th>
+        <th>@(nameof(MergedRecord.Zip))</th>
+        <th>@(nameof(MergedRecord.PhotoDriveUrl))</th>
+        <th>@(nameof(MergedRecord.MetWith))</th>
+        <th>@(nameof(MergedRecord.HasCalling))</th>
+        <th>@(nameof(MergedRecord.IsPendingReview))</th>
+        <th>@(nameof(MergedRecord.DatePulled))</th>
+        <th>@(nameof(MergedRecord.HasPhotoOnWall))</th>
+    </MatTableHeader>
+    <MatTableRow>
+       <td>@(context.Fullname)</td>
+       <td>@(context.Pulled)</td>
+       <td>@(context.PulledTimestamp)</td>
+       <td>@(context.Birthday)</td>
+       <td>@(context.Email)</td>
+       <td>@(context.Phone)</td>
+       <td>@(context.Address)</td>
+       <td>@(context.ApartmentNumber)</td>
+       <td>@(context.City)</td>
+       <td>@(context.Zip)</td>
+       <td>@(context.PhotoDriveUrl)</td>
+       <td>@(context.MetWith)</td>
+       <td>@(context.HasCalling)</td>
+       <td>@(context.IsPendingReview)</td>
+       <td>@(context.DatePulled)</td>
+       <td>@(context.HasPhotoOnWall)</td>
+    </MatTableRow>
+</MatTable>
+
+@code
+{
+    private IEnumerable<MergedRecord> GetRecords()
+    {
+        return RecordDataService.GetRecords().OrderBy(x => x.Fullname);
+    }
+}
