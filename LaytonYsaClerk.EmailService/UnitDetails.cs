@@ -12,7 +12,7 @@ public class UnitDetails
     
     [JsonPropertyName("leaderName")]
     public string LeaderName { get; set; } = default!;
-
+    
     [JsonPropertyName("leaderCellPhone")]
     public string LeaderCellPhone { get; set; } = default!;
 
