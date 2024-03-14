@@ -6,6 +6,9 @@ public class ChurchUser
 {
     [JsonPropertyName("id")]
     public long MemberId { get; set; }
+
+    [JsonPropertyName("newMemberEmailSentDate")]
+    public DateTime? NewMemberEmailSentDate { get; set; } = null;
     
     [JsonPropertyName("textAddress")]
     public string Address { get; set; } = default!;

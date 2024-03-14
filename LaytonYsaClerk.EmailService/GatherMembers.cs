@@ -44,12 +44,8 @@ public static class GatherMembers
         var seenMembers =
             (JsonSerializer.Deserialize<IEnumerable<ChurchUser>>(fileData) ?? Enumerable.Empty<ChurchUser>()).ToList();
         Console.WriteLine($"Gathering Member Ids from previously seen members: {seenMembers.Count()} total");
-        var seenMemberIds = seenMembers.Select(m => m.MemberId);
 
-        var membersNotYetSeen = members.Where(m => !seenMemberIds.Contains(m.MemberId));
-
-
-        foreach (var member in membersNotYetSeen)
+        foreach (var member in members)
         {
             Console.WriteLine($"Processing Unit for Member: {member.FullName}");
             var oldUnitDetailsJson = await page.EvaluateAsync<string>(
@@ -64,9 +60,7 @@ public static class GatherMembers
             member.UnitDetails = oldUnitDetails;
         }
 
-        File.Delete(membersSeenFilePath);
-        await File.WriteAllTextAsync(membersSeenFilePath, JsonSerializer
-           .Serialize(members, new JsonSerializerOptions() { WriteIndented = true }));
+        await WriteMembers(membersSeenFilePath, members);
 
         return members;
         
@@ -79,6 +73,13 @@ public static class GatherMembers
         {
             return new Uri($"https://lcr.churchofjesuschrist.org/api/cdol/details/unit/{unit}?lang=eng");
         }
+    }
+
+    public static async Task WriteMembers(string filePath, IEnumerable<ChurchUser> churchUsers)
+    {
+        File.Delete(filePath);
+        await File.WriteAllTextAsync(filePath, JsonSerializer
+           .Serialize(churchUsers, new JsonSerializerOptions() { WriteIndented = true }));
     }
 
     public static async Task<IEnumerable<EmailTemplate>> FromEmailTemplate(IEnumerable<ChurchUser> members)
