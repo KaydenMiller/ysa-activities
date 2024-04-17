@@ -4,7 +4,7 @@ using SendGrid;
 using SendGrid.Helpers.Mail;
 
 /* TOGGLE THIS TO ALLOW SENDING OF EMAILS */
-const bool SendEmails = false;
+const bool SendEmails = true;
 const bool ReadMembers = false;
 var apiKey = Environment.GetEnvironmentVariable("SEND_GRID_APIKEY") ?? throw new ArgumentNullException();
 
@@ -23,15 +23,15 @@ if (ReadMembers)
 }
 else
 {
-    churchUsers = (await GatherMembers.GetMembers(MembersSeenFilePath)).ToList();
-}
+    var file = File.ReadAllText(MembersSeenFilePath);
+    var alreadyFoundUsers = (JsonSerializer.Deserialize<IEnumerable<ChurchUser>>(file)).ToList() ?? [];
+    var alreadyFoundUserIds = alreadyFoundUsers.Select(u => u.MemberId);
+    var webUsers = (await GatherMembers.GetMembers(MembersSeenFilePath))
+       .Where(u => !alreadyFoundUserIds.Contains(u.MemberId))
+       .ToList();
 
-var updatedMembers = churchUsers.Select(u =>
-{
-    u.NewMemberEmailSentDate = DateTime.UtcNow;
-    return u;
-});
-await GatherMembers.WriteMembers(MembersSeenFilePath, updatedMembers);
+    churchUsers = [..alreadyFoundUsers, ..webUsers];
+}
 
 var membersToEmailAbout = churchUsers.Where(m => m.NewMemberEmailSentDate is null).ToList();
 
@@ -42,9 +42,22 @@ if (!membersToEmailAbout.Any())
     Console.WriteLine("------------------------------");
     return;
 }
+else
+{
+    Console.WriteLine("------------------------------");
+    Console.WriteLine($"There are {churchUsers.Count} members to email!");
+    Console.WriteLine("------------------------------");
+}
 
 if (!SendEmails) return;
 // Use send grid to send emails
+
+var updatedMembers = churchUsers.Select(u =>
+{
+    u.NewMemberEmailSentDate = DateTime.UtcNow;
+    return u;
+});
+await GatherMembers.WriteMembers(MembersSeenFilePath, updatedMembers);
 
 var client = new SendGridClient(apiKey);
 
