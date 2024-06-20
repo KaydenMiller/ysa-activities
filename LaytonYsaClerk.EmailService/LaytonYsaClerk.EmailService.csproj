@@ -12,6 +12,8 @@
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
+      <Content Include=".local\kind\CreateKindCluster.ps1" />
+      <Content Include=".local\kind\DeleteKindCluster.ps1" />
     </ItemGroup>
 
     <ItemGroup>
@@ -21,7 +23,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="files\" />
+      <Folder Include=".charts\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include=".local\kind\KindCluster.yaml" />
     </ItemGroup>
 
 </Project>

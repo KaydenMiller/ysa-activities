@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
+﻿using System.Text.Json;
 using Microsoft.Playwright;
 
 namespace LaytonYsaClerk.EmailService;
@@ -12,7 +11,7 @@ public static class GatherMembers
     const string FromClerkName = "Kayden Miller";
     const string FromClerkEmail = "kaydenmiller1@gmail.com";
     
-    public static async Task<IEnumerable<ChurchUser>> GetMembers(string membersSeenFilePath)
+    public static async Task<IEnumerable<ChurchUser>> GetMembers(string username, string password, int monthsToGather)
     {
         using var playwright = await Playwright.CreateAsync();
 
@@ -26,25 +25,19 @@ public static class GatherMembers
         Console.WriteLine("Performing page navigation");
         await page.GotoAsync("https://www.churchofjesuschrist.org/my-home?lang=eng");
         await page.ClickAsync("#signInButton");
-        await page.FillAsync("//input[@autocomplete=\"username\"]", "KaydenMiller");
+        await page.FillAsync("//input[@autocomplete=\"username\"]", username);
         await page.ClickAsync("//input[@type=\"submit\"]");
         await page.ClickAsync("//input[@name=\"credentials.passcode\"]");
-        await page.FillAsync("//input[@type=\"password\"]", "ZAQ!2wsx");
+        await page.FillAsync("//input[@type=\"password\"]", password);
         await page.ClickAsync("//input[@type=\"submit\"]");
         Console.WriteLine("Finished Input of Username and Password");
         await page.WaitForTimeoutAsync(3000);
         await page.GotoAsync("https://lcr.churchofjesuschrist.org/report/members-moved-in?lang=eng");
         await page.WaitForTimeoutAsync(3000);
         Console.WriteLine("Gathering response from church about Members moved in");
-        var wardMembersResponse = await page.EvaluateAsync<string>("async (uri) => JSON.stringify(await (await fetch(uri)).json())", GetNewMembersUri(1).ToString());
+        var wardMembersResponse = await page.EvaluateAsync<string>("async (uri) => JSON.stringify(await (await fetch(uri)).json())", GetNewMembersUri(monthsToGather).ToString());
 
         var members = (JsonSerializer.Deserialize<IEnumerable<ChurchUser>>(wardMembersResponse) ?? Enumerable.Empty<ChurchUser>()).ToList();
-        Console.WriteLine($"Reading file data from system for file: {membersSeenFilePath}");
-        var fileData = await File.ReadAllTextAsync(membersSeenFilePath);
-        if (string.IsNullOrWhiteSpace(fileData)) fileData = "[]";
-        var seenMembers =
-            (JsonSerializer.Deserialize<IEnumerable<ChurchUser>>(fileData) ?? Enumerable.Empty<ChurchUser>()).ToList();
-        Console.WriteLine($"Gathering Member Ids from previously seen members: {seenMembers.Count()} total");
 
         foreach (var member in members)
         {
@@ -60,8 +53,6 @@ public static class GatherMembers
 
             member.UnitDetails = oldUnitDetails;
         }
-
-        await WriteMembers(membersSeenFilePath, members);
 
         return members;
         

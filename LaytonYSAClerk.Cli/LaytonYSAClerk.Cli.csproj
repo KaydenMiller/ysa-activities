@@ -2,10 +2,11 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net7.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <LangVersion>12</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -15,16 +16,22 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Alba.CsConsoleFormat" Version="1.0.0" />
-      <PackageReference Include="Flurl.Http" Version="3.2.4" />
-      <PackageReference Include="Google.Apis.Oauth2.v2" Version="1.60.0.1869" />
-      <PackageReference Include="Google.Apis.Sheets.v4" Version="1.60.0.2979" />
+      <PackageReference Include="Cocona" Version="2.2.0" />
+      <PackageReference Include="ConsoleTables" Version="2.6.1" />
+      <PackageReference Include="ErrorOr" Version="2.0.1" />
+      <PackageReference Include="Flurl.Http" Version="4.0.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.6">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="OpenTelemetry" Version="1.9.0" />
+      <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="merged-records.json">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      </None>
+      <ProjectReference Include="..\LaytonYsaClerk.EmailService\LaytonYsaClerk.EmailService.csproj" />
     </ItemGroup>
 
 </Project>

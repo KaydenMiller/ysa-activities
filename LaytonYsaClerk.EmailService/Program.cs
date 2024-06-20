@@ -26,7 +26,7 @@ else
     var file = File.ReadAllText(MembersSeenFilePath);
     var alreadyFoundUsers = (JsonSerializer.Deserialize<IEnumerable<ChurchUser>>(file)).ToList() ?? [];
     var alreadyFoundUserIds = alreadyFoundUsers.Select(u => u.MemberId);
-    var webUsers = (await GatherMembers.GetMembers(MembersSeenFilePath))
+    var webUsers = (await GatherMembers.GetMembers("KaydenMiller", "ZAQ!2wsx", 1))
        .Where(u => !alreadyFoundUserIds.Contains(u.MemberId))
        .ToList();
 

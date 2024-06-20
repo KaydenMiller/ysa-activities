@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaytonYSAClerk.Cli", "LaytonYSAClerk.Cli\LaytonYSAClerk.Cli.csproj", "{50844FAA-A016-4D81-AF9C-A7FFA9F56CE5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaytonYSAClerk", "LaytonYSAClerk\LaytonYSAClerk.csproj", "{A65E710D-048D-4CCF-AE73-C540F3C29A84}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LaytonYsaClerk.EmailService", "LaytonYsaClerk.EmailService\LaytonYsaClerk.EmailService.csproj", "{2E59A3B8-3010-4BA9-BBF0-955121B05C6A}"
 EndProject
 Global
@@ -16,10 +14,6 @@ Global
 		{50844FAA-A016-4D81-AF9C-A7FFA9F56CE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50844FAA-A016-4D81-AF9C-A7FFA9F56CE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50844FAA-A016-4D81-AF9C-A7FFA9F56CE5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A65E710D-048D-4CCF-AE73-C540F3C29A84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A65E710D-048D-4CCF-AE73-C540F3C29A84}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A65E710D-048D-4CCF-AE73-C540F3C29A84}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A65E710D-048D-4CCF-AE73-C540F3C29A84}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2E59A3B8-3010-4BA9-BBF0-955121B05C6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2E59A3B8-3010-4BA9-BBF0-955121B05C6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E59A3B8-3010-4BA9-BBF0-955121B05C6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
