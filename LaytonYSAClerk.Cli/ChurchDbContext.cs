@@ -21,7 +21,7 @@ public class ChurchDbContext : DbContext
            .HasKey(m => m.MemberId);
 
         modelBuilder.Entity<Unit>()
-           .HasKey(u => u.UnitNumber);
+           .HasKey(u => new { u.MemberId, u.UnitNumber });
         modelBuilder.Entity<Unit>()
           .HasIndex(u => u.MemberId);
 

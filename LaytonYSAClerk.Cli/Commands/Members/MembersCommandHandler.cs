@@ -23,7 +23,9 @@ public class MembersCommandHandler
         [FromService] MembersRepository membersRepository)
     {
         var members = await membersRepository.GetMembers();
-        members.WriteMembersToTable();
+        members
+           .OrderBy(m => m.MoveInDate)
+           .WriteMembersToTable();
     }
 
     public static async Task EmailMembersBishops(

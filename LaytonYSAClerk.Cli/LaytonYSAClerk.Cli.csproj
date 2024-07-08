@@ -34,4 +34,8 @@
       <ProjectReference Include="..\LaytonYsaClerk.EmailService\LaytonYsaClerk.EmailService.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="bin\Debug\net8.0\Church.db" />
+    </ItemGroup>
+
 </Project>
