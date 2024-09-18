@@ -35,7 +35,7 @@ public static class GatherMembers
         await page.GotoAsync("https://lcr.churchofjesuschrist.org/report/members-moved-in?lang=eng");
         await page.WaitForTimeoutAsync(3000);
         Console.WriteLine("Gathering response from church about Members moved in");
-        var wardMembersResponse = await page.EvaluateAsync<string>("async (uri) => JSON.stringify(await (await fetch(uri)).json())", GetNewMembersUri(monthsToGather).ToString());
+        var wardMembersResponse = await page.EvaluateAsync<string>("async (uri) => JSON.stringify(await (await fetch(uri)).json())", GetNewMembersUri(530409, monthsToGather).ToString());
 
         var members = (JsonSerializer.Deserialize<IEnumerable<ChurchUser>>(wardMembersResponse) ?? Enumerable.Empty<ChurchUser>()).ToList();
 
@@ -45,6 +45,14 @@ public static class GatherMembers
             var oldUnitDetailsJson = await page.EvaluateAsync<string>(
                 "async (uri) => JSON.stringify(await (await fetch(uri)).json())",
                 GetUnitDetailsUri(member.PriorUnitNumber).ToString());
+
+            if (oldUnitDetailsJson.Contains("DOCTYPE"))
+            {
+                // This is a weird behavior that happens sometimes we just need to skip it for now
+                Console.WriteLine($"Weird Behavior for user '{member.FullName}' with member id '{member.MemberId}'");
+                continue;
+            }
+            
             var oldUnitDetails = JsonSerializer.Deserialize<UnitDetails>(oldUnitDetailsJson);
             if (oldUnitDetails is null)
             {
@@ -56,9 +64,9 @@ public static class GatherMembers
 
         return members;
         
-        Uri GetNewMembersUri(int months)
+        Uri GetNewMembersUri(int wardNumber, int months)
         {
-            return new Uri($"https://lcr.churchofjesuschrist.org/api/report/members-moved-in/unit/266329/{months}?lang=eng");
+            return new Uri($"https://lcr.churchofjesuschrist.org/api/report/members-moved-in/unit/{wardNumber}/{months}?lang=eng");
         }
 
         Uri GetUnitDetailsUri(string unit)

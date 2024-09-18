@@ -12,6 +12,11 @@ public static class RegisterCommands
             memberCommand.AddCommand("update", MembersCommandHandler.UpdateMembers);
             memberCommand.AddCommand("list", MembersCommandHandler.ListMembers);
             memberCommand.AddCommand("email", MembersCommandHandler.EmailMembersBishops);
+
+            memberCommand.AddSubCommand("set", (setCommand) =>
+            {
+                setCommand.AddCommand("status", MembersCommandHandler.SetStatus);
+            });
         });
     }
 }

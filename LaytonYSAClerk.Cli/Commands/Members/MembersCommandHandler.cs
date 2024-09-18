@@ -1,6 +1,4 @@
 ﻿using Cocona;
-using ConsoleTables;
-using ErrorOr;
 using LaytonYSAClerk.Cli.Entities;
 using LaytonYSAClerk.Cli.Services;
 
@@ -51,5 +49,38 @@ public class MembersCommandHandler
         }
         
         failedMembers.WriteMembersToTable();
+    }
+
+    public static async Task SetStatus(
+        [Option("all")] bool allMembers,
+        [Option("member")] long? memberId,
+        [FromService] MembersRepository membersRepository)
+    {
+        if (memberId is not null)
+        {
+            var member = await membersRepository.GetMember(memberId.Value);
+            if (member is null)
+            {
+                throw new Exception("Member with id not found");
+            }
+            
+            member.NewMemberEmailSentDate = DateTime.UtcNow;
+            await membersRepository.UpdateMember(member);
+        }
+
+        if (allMembers)
+        {
+            var members = await membersRepository.GetMembers();
+            var needToEmailMembers = members.Where(m => m.NewMemberEmailSentDate is null);
+            foreach (var member in needToEmailMembers)
+            {
+                member.NewMemberEmailSentDate = DateTime.UtcNow;
+                await membersRepository.UpdateMember(member);
+            }
+        }
+        else
+        {
+            throw new Exception("Missing required option");
+        }
     }
 }
