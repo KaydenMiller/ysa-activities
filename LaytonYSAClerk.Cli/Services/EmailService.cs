@@ -25,6 +25,12 @@ public class EmailService
 
     public async Task<ErrorOr<Success>> SendEmailForMember(Member member)
     {
+        if (member.Unit is null)
+        {
+            _logger.LogWarning("Unable to send email for user due to missing unit");
+            return Result.Success;
+        }
+        
         var template = CreateEmailTemplate(member);
         _logger.LogInformation("Created template for member {MemberName}, {MemberId}", member.FullName, member.MemberId);
         

@@ -18,7 +18,7 @@ public static class Helpers
             MoveInDate = user.MoveInDate,
             Phone = user.Phone,
             FullName = user.FullName,
-            Unit = user.UnitDetails.ToUnit(user.MemberId)
+            Unit = user.UnitDetails?.ToUnit(user.MemberId)
         };
     }
 

@@ -10,6 +10,7 @@ public static class GatherMembers
     const string FromBishopPhone = "(801) 540-8891";
     const string FromClerkName = "Kayden Miller";
     const string FromClerkEmail = "kaydenmiller1@gmail.com";
+    const int LAYTON_YSA_WARD_NUMBER = 266329;
     
     public static async Task<IEnumerable<ChurchUser>> GetMembers(string username, string password, int monthsToGather)
     {
@@ -41,18 +42,17 @@ public static class GatherMembers
 
         foreach (var member in members)
         {
+            if (member.PriorUnitNumber == LAYTON_YSA_WARD_NUMBER.ToString())
+            {
+                Console.WriteLine("Member was part of layton ysa skipping");
+                continue;
+            }
+            
             Console.WriteLine($"Processing Unit for Member: {member.FullName}");
             var oldUnitDetailsJson = await page.EvaluateAsync<string>(
                 "async (uri) => JSON.stringify(await (await fetch(uri)).json())",
                 GetUnitDetailsUri(member.PriorUnitNumber).ToString());
 
-            if (oldUnitDetailsJson.Contains("DOCTYPE"))
-            {
-                // This is a weird behavior that happens sometimes we just need to skip it for now
-                Console.WriteLine($"Weird Behavior for user '{member.FullName}' with member id '{member.MemberId}'");
-                continue;
-            }
-            
             var oldUnitDetails = JsonSerializer.Deserialize<UnitDetails>(oldUnitDetailsJson);
             if (oldUnitDetails is null)
             {

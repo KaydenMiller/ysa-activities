@@ -37,5 +37,5 @@ public class Member
     [Column("priorUnitNumber")]
     public string? PriorUnitNumber { get; set; } = default!;
     
-    public virtual Unit Unit { get; set; } = default!;
+    public virtual Unit? Unit { get; set; } = default!;
 }

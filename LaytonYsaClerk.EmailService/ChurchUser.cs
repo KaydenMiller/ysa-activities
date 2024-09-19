@@ -44,5 +44,5 @@ public class ChurchUser
     public string PriorUnitNumber { get; set; } = default!;
 
     [JsonPropertyName("unitDetails")]
-    public UnitDetails UnitDetails { get; set; } = default!;
+    public UnitDetails? UnitDetails { get; set; } = default!;
 }
