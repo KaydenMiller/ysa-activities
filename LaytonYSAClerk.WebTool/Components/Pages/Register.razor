@@ -1,0 +1,61 @@
+﻿@page "/register/{ActivityCode:alpha}"
+@using Church.Ysa.Domain
+@using LaytonYSAClerk.WebTool.Services
+@rendermode InteractiveServer 
+@inject ILogger<Register> Logger
+@inject MemberService MemberService
+
+<h3>Please Register for the event</h3>
+<MudContainer>
+    <MudTextField Label="Who are you?" @bind-Value="_searchParameter" Variant="Variant.Outlined"></MudTextField>
+    <MudButton OnClick="GetFilteredMembers" Color="Color.Primary">Search</MudButton>
+
+    <MudPaper>
+        <MudList T="ChurchMember" @bind-SelectedValue="_selectedChurchMember">
+            @foreach (var member in _filteredMembers) {
+                <MudListItem>
+                    <AvatarContent>
+                        <MudAvatar>
+                            <MudImage Src="@GetMemberImage(member)" />
+                        </MudAvatar>
+                    </AvatarContent>
+                    <ChildContent>
+                        @member.SpokenName
+                    </ChildContent>
+                </MudListItem>
+            }
+        </MudList>
+    </MudPaper>
+    
+    <MudButton OnClick="JoinActivity" Color="Color.Primary">Join Activity</MudButton>
+</MudContainer>
+
+@code {
+    private string _searchParameter = "";
+    private IEnumerable<ChurchMember> _filteredMembers = [];
+    private ChurchMember? _selectedChurchMember = null;
+    private ChurchActivity? _churchActivity = null;
+
+    [Parameter]
+    public string ActivityCode { get; set; } = null!;
+
+    private string GetMemberImage(ChurchMember member)
+    {
+        if (member.Image is null) return "";
+        return $"{member.Image.TokenUrl}/MEDIUM";
+    }
+
+    private async Task GetFilteredMembers()
+    {
+        Logger.LogInformation("Searching for {SearchParam}", _searchParameter);
+        _filteredMembers = await MemberService.SearchMembersFuzzy(_searchParameter);
+    }
+
+    private async Task JoinActivity()
+    {
+        if (_selectedChurchMember is null) throw new Exception("Member cannot be null");
+        Logger.LogInformation("Joining Activity {ActivityCode} with Member {MemberId}", ActivityCode, _selectedChurchMember!.ChruchMemberId);
+        var activity = await MemberService.FindActivityByName(ActivityCode);
+        await MemberService.JoinActivity(activity.Id, _selectedChurchMember!.ChruchMemberId);
+    }
+}

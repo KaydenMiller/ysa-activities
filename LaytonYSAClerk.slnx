@@ -1,0 +1,6 @@
+﻿<Solution>
+  <Project Path="Church.Ysa.Domain\Church.Ysa.Domain.csproj" Type="Classic C#" />
+  <Project Path="LaytonYSAClerk.Cli\LaytonYSAClerk.Cli.csproj" Type="Classic C#" />
+  <Project Path="LaytonYsaClerk.EmailService\LaytonYsaClerk.EmailService.csproj" Type="Classic C#" />
+  <Project Path="LaytonYSAClerk.WebTool\LaytonYSAClerk.WebTool.csproj" Type="Classic C#" />
+</Solution>
