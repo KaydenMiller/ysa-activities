@@ -1,19 +1,21 @@
-using System.Security.AccessControl;
 using LaytonYSAClerk.WebTool.Components;
 using LaytonYSAClerk.WebTool.Services;
 using MongoDB.Driver;
 using MudBlazor.Services;
 
+// var builder = WebAssemblyHostBuilder.CreateDefault(args);
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
    .AddInteractiveServerComponents();
+// .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddHttpClient();
 builder.Services.AddMudServices();
 builder.Services.AddSingleton<MemberService>();
 builder.Services.AddSingleton<MemberRepository>();
+builder.Services.AddSingleton<ActivityRepository>();
 builder.Services.AddSingleton<MongoClient>(_ =>
 {
     var connectionString = builder.Configuration.GetConnectionString("default");
@@ -37,5 +39,6 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
    .AddInteractiveServerRenderMode();
+   // .AddInteractiveWebAssemblyRenderMode();
 
-app.Run();
+await app.RunAsync();

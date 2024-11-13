@@ -1,0 +1,68 @@
+﻿@page "/activities"
+@using LaytonYSAClerk.WebTool.Services
+@rendermode InteractiveServer
+@inject MemberService MemberService
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
+
+<MudContainer>
+    <MudPaper>
+        <MudText Typo="Typo.h1">Activities</MudText>
+        
+        <MudTable T="ChurchActivity" Items="@_activities">
+            <HeaderContent>
+                <MudTh>Name</MudTh>
+                <MudTh>Created At</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Created At">@DateTime.Today.ToString("d")</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudButton OnClick="@(() => GotoActivity(context.Name))">Goto</MudButton>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudPaper>
+    
+    <MudIconButton Icon="@Icons.Material.Filled.Add" 
+                   Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Style="position: absolute; bottom: 50px; right: 50px;"
+                   OnClick="OpenCreateActivityDialog"/>
+</MudContainer>
+
+@code {
+    IEnumerable<ChurchActivity> _activities = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetActivities();
+    }
+
+    private async Task GetActivities()
+    {
+        _activities = await MemberService.GetActivities();
+    }
+    
+    private async Task OpenCreateActivityDialog()
+    {
+        var dialogRef = await DialogService.ShowAsync<CreateActivityModal>("Create Activity", new DialogOptions()
+        {
+            BackdropClick = false,
+            CloseOnEscapeKey = true,
+            FullScreen = false
+        });
+        var dialogResult = await dialogRef.Result;
+
+        if (!dialogResult!.Canceled)
+        {
+            await MemberService.CreateActivity(dialogResult.Data!.ToString()!);
+        }
+    }
+
+    private void GotoActivity(string activityName)
+    {
+        NavigationManager.NavigateTo($"/activities/{activityName}");
+    }
+}

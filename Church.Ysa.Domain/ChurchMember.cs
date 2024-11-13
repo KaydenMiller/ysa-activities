@@ -11,6 +11,10 @@ public class ChurchMember
     public long ChruchMemberId { get; set; }
     [JsonPropertyName("name")]
     public string Name { get; set; }
+
+    [JsonIgnore]
+    public string FullName => string.Join(' ', Name.Split(',').Reverse());
+    
     [JsonPropertyName("spokenName")]
     public string SpokenName { get; set; }
     [JsonPropertyName("nameOrder")]

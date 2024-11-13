@@ -1,6 +1,7 @@
 ﻿using Church.Ysa.Domain;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace LaytonYSAClerk.WebTool.Services;
 
@@ -33,6 +34,16 @@ public class MemberRepository
         var members = await _database
            .GetCollection<ChurchMember>(COLLECTION)
            .Find(filter)
+           .ToListAsync();
+        return members;
+    }
+    
+    public async Task<IEnumerable<ChurchMember>> GetMembersByIds(IEnumerable<long> memberIds)
+    {
+        _logger.LogInformation("Getting Members by Ids");
+        var members = await _database.GetCollection<ChurchMember>(COLLECTION)
+           .AsQueryable()
+           .Where(m => memberIds.Contains(m.ChruchMemberId))
            .ToListAsync();
         return members;
     }

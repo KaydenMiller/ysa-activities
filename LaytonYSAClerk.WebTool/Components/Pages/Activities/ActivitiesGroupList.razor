@@ -1,0 +1,31 @@
+﻿@page "/activities/{ActivityName:alpha}/groups"
+@using LaytonYSAClerk.WebTool.Services
+@rendermode InteractiveServer
+@inject MemberService MemberService
+
+<MudContainer>
+    <MudPaper>
+        <MudGrid>
+            @foreach (var group in _churchActivity?.groups ?? [])
+            {
+                <MudItem xs="12" lg="3">
+                    <ActivityGroupCard Group="group" />
+                </MudItem>
+            }
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public string ActivityName { get; set; } = null!;
+    
+    private ChurchActivity? _churchActivity;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _churchActivity = await MemberService.FindActivityByName(ActivityName);
+    }
+
+}

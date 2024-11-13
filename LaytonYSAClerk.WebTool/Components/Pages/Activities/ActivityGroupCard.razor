@@ -1,0 +1,27 @@
+﻿@using LaytonYSAClerk.WebTool.Services
+
+<MudCard>
+    <MudCardHeader>
+        <MudText>
+            @(string.Join(", ", Group.GroupMembers.Select(m => m.FullName)))
+        </MudText>
+    </MudCardHeader>
+    <MudCardContent>
+        <ul>
+            @foreach (var member in Group.ObjectiveMembers ?? [])
+            {
+                <li>@member.Name</li>
+            }
+        </ul>
+    </MudCardContent>
+    <MudCardActions>
+        <MudButton>Details</MudButton>
+    </MudCardActions>
+</MudCard>
+
+@code {
+
+    [Parameter]
+    public MemberGroup Group { get; set; } = null!;
+
+}

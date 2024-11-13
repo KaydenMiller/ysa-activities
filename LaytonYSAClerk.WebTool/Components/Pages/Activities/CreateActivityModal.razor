@@ -1,0 +1,33 @@
+﻿@rendermode InteractiveServer
+
+<MudDialog>
+    <TitleContent>Create Activity</TitleContent>
+    <DialogContent>
+        <MudForm @ref="form" @bind-IsValid="@success" @bind-Errors="@errors">
+            <MudTextField T="string" 
+                          Label="Activity Name" 
+                          Required="true" 
+                          RequiredError="Activity name is required!" 
+                          @bind-Value="activityName"
+            />
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    bool success;
+    string[] errors = [];
+    MudForm form;
+    string activityName;
+
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; } = null!;
+    
+    private void Submit() => MudDialog.Close(DialogResult.Ok(activityName));
+    private void Cancel() => MudDialog.Cancel();
+}

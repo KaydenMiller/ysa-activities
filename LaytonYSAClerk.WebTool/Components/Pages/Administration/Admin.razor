@@ -1,0 +1,19 @@
+﻿@page "/admin/{ActivityName:alpha}"
+@using LaytonYSAClerk.WebTool.Services
+@rendermode InteractiveServer
+@inject MemberService MemberService
+@inject ILogger<Admin> Logger
+
+<h3>Admin</h3>
+<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@(async () => await PartnerPeople())">Generate Partners</MudButton>
+
+@code {
+
+    [Parameter]
+    public string ActivityName { get; set; } = null!;
+    private async Task PartnerPeople()
+    {
+        Logger.LogInformation("Begin Generating Partners for Activity {ActivityName}", ActivityName);
+        await MemberService.GeneratePartners(ActivityName);
+    }
+}

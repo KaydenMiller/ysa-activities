@@ -1,0 +1,111 @@
+﻿@page "/activities/{ActivityName:alpha}"
+@using Church.Ysa.Domain
+@using LaytonYSAClerk.WebTool.Services
+@rendermode InteractiveServer
+@inject MemberService MemberService
+@inject ActivityRepository ActivityRepository
+@inject NavigationManager Navigation
+@inject ILogger<Activity> Logger
+
+<MudContainer>
+    <MudPaper>
+        <MudText Typo="Typo.h1">@(ChurchActivity?.Name ?? "")</MudText>
+        
+        <MudDivider />
+        
+        <MudDropContainer T="Droppable<ChurchMember>" @ref="_container" 
+                          Items="DroppableMembers"
+                          ItemsSelector="@((item, dropzone) => item.Dropzone == dropzone)"
+                          ItemDropped="@ItemUpdated"
+                          Class="d-flex flex-wrap flex-grow-1">
+            <ChildContent>
+                <MudDropZone T="Droppable<ChurchMember>" Identifier="Available" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
+                    <MudText Typo="Typo.h6">Available</MudText>
+                </MudDropZone>
+                <MudDropZone T="Droppable<ChurchMember>" Identifier="Not Available" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
+                    <MudText Typo="Typo.h6">Not Available</MudText>
+                </MudDropZone>
+            </ChildContent>
+            <ItemRenderer>
+                <MudPaper Elevation="25" Class="pa-2 my-4">@context.Item.Name</MudPaper>
+            </ItemRenderer>
+        </MudDropContainer>
+        
+        <div>
+            <MudButton Color="Color.Primary" OnClick="@(async () => await GenerateGroups())">Split Into Groups</MudButton>
+            <MudButton Color="Color.Primary" OnClick="@NavigateToGroups">View Groups</MudButton>
+        </div>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string ActivityName { get; set; } = null!;
+
+    private MudDropContainer<Droppable<ChurchMember>> _container = null!;
+
+    public ChurchActivity? ChurchActivity = null!;
+    public IEnumerable<Droppable<ChurchMember>> DroppableMembers { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        ChurchActivity = await MemberService.FindActivityByName(ActivityName);
+        var members = (await MemberService.GetMembers()).ToList();
+        var availableMembers = members.Where(m => ChurchActivity.JoinedMembers.Contains(m.ChruchMemberId)).ToList();
+        var droppableAvailableMembers = availableMembers.Select(m => new Droppable<ChurchMember> { Item = m, Dropzone = "Available" });
+        var notAvailableMembers = members.Except(availableMembers)
+           .Select(m => new Droppable<ChurchMember>() { Item = m, Dropzone = "Not Available"});
+
+        DroppableMembers = droppableAvailableMembers.Concat(notAvailableMembers);
+        
+        StateHasChanged();
+        _container.Refresh();
+    }
+
+    private async Task ItemUpdated(MudItemDropInfo<Droppable<ChurchMember>> dropItem)
+    {
+        if (dropItem.Item is null)
+            throw new Exception("Well that isn't good, please don't do that.");
+        dropItem.Item.Dropzone = dropItem.DropzoneIdentifier;
+
+
+        if (ChurchActivity is null) return;
+
+        if (dropItem.DropzoneIdentifier is "Available")
+        {
+            await ActivityRepository.AddMemberToActivity(dropItem.Item.Item.ChruchMemberId, ChurchActivity.Id);
+        }
+        else
+        {
+            await ActivityRepository.RemoveMemberFromActivity(dropItem.Item.Item.ChruchMemberId, ChurchActivity.Id);
+        }
+        
+        StateHasChanged();
+        _container.Refresh();
+    }
+
+    private async Task GenerateGroups()
+    {
+        // var availableMembers = DroppableMembers.Where(d => d.Dropzone is "Available");
+        var result = await MemberService.GeneratePartners(ActivityName);
+        if (result)
+        {
+            NavigateToGroups();
+        }
+        else
+        {
+            Logger.LogWarning("Unable to navigate to groups partner generation failed");
+        }
+    }
+
+    private void NavigateToGroups()
+    {
+        Navigation.NavigateTo($"/activities/{ActivityName}/groups");
+    }
+
+    public class Droppable<T> where T : class
+    {
+        public string Dropzone { get; set; }
+        public T Item { get; init; }
+    }
+}
