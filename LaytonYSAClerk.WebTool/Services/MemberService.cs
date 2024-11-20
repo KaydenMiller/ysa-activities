@@ -83,7 +83,6 @@ public class MemberService
         return true;
     }
 
-    private const int GROUP_SIZE = 3;
     public async Task<bool> GeneratePartners(string activityName)
     {
         var activity = await FindActivityByName(activityName);
@@ -100,13 +99,13 @@ public class MemberService
         var memberIds = activity.JoinedMembers;
         var members = (await _memberRepository.GetMembersByIds(memberIds)).ToList();
         var membersToSeek = (await _memberRepository.GetMembers()).Except(members).ToList();
-        var randomizedMembers = members.ToList().Shuffle();
-        var groups = randomizedMembers.Chunk(GROUP_SIZE).ToList()
-           .Select(m => new MemberGroup(ObjectId.GenerateNewId(), m, [], ""))
-           .ToList();
+
+        var groupFactory = new MemberGroupFactory(members);
+        var groups = groupFactory.CreateGroups().ToList();
+        
         var buckets = membersToSeek.Count / groups.Count;
         var shuffledMembersToSeek = membersToSeek.ToList();
-        var membersToSeekBucket = shuffledMembersToSeek.Chunk(buckets).ToArray();
+        var membersToSeekBucket = shuffledMembersToSeek.Chunk(buckets).ToList();
 
         for (var groupIdx = 0; groupIdx < groups.Count; groupIdx++)
         {
