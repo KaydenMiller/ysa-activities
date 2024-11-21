@@ -1,5 +1,6 @@
 ﻿@page "/activities/{ActivityName:alpha}/groups"
 @using LaytonYSAClerk.WebTool.Services
+@using MongoDB.Bson
 @rendermode InteractiveServer
 @inject MemberService MemberService
 
@@ -9,7 +10,7 @@
             @foreach (var group in _churchActivity?.groups ?? [])
             {
                 <MudItem xs="12" lg="3">
-                    <ActivityGroupCard Group="group" />
+                    <ActivityGroupCard Group="group" ActivityId="@(_churchActivity?.Id ?? ObjectId.Empty)" />
                 </MudItem>
             }
         </MudGrid>

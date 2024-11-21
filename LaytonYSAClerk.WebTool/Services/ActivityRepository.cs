@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
+using MudBlazor.Extensions;
 
 namespace LaytonYSAClerk.WebTool.Services;
 
@@ -65,6 +66,15 @@ public class ActivityRepository
         return activity.JoinedMembers;
     }
 
+    public async Task<MemberGroup?> GetMemberGroup(ObjectId activityId, ObjectId groupId)
+    {
+        var activity = await _database.GetCollection<ChurchActivity>(COLLECTION)
+           .AsQueryable()
+           .SingleOrDefaultAsync(a => a.Id == activityId);
+        var group = activity.groups.SingleOrDefault(g => g.GroupId == groupId);
+        return group;
+    }
+
     public async Task UpsertMemberGroup(ObjectId activityId, MemberGroup memberGroup)
     {
         _logger.LogInformation("Upsert Member Group in mongo");
@@ -85,5 +95,12 @@ public class ActivityRepository
 
         await _database.GetCollection<ChurchActivity>(COLLECTION)
            .UpdateOneAsync(activityFilter, update);
+    }
+
+    public async Task DeleteActivity(ObjectId activityId)
+    {
+        _logger.LogInformation("Deleting activity with id {ActivityId}", activityId);
+        await _database.GetCollection<ChurchActivity>(COLLECTION)
+           .DeleteOneAsync(Builders<ChurchActivity>.Filter.Eq("_id", activityId));
     }
 }

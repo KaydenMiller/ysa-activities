@@ -1,0 +1,40 @@
+﻿@page "/activities/{ActivityId}/group/{GroupId}"
+@using LaytonYSAClerk.WebTool.Services
+@using MongoDB.Bson
+@inject ActivityRepository ActivityRepository
+
+<MudContainer>
+    <MudPaper Elevation="2">
+        <MudText Typo="Typo.h2">Group Containing:</MudText>
+        <ul>
+            @foreach (var member in Group?.GroupMembers ?? [])
+            {
+                <li>@member.FullName</li>
+            }
+        </ul>
+        
+        <MudText Typo="Typo.h2">Members to Fellowship</MudText>
+        <ul>
+            @foreach (var friend in Group?.ObjectiveMembers ?? [])
+            {
+                <li>@friend.FullName</li>
+            }
+        </ul>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    
+    [Parameter]
+    public string ActivityId { get; set; }
+    [Parameter]
+    public string GroupId { get; set; }
+    
+    private MemberGroup? Group { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Group = await ActivityRepository.GetMemberGroup(ObjectId.Parse(ActivityId), ObjectId.Parse(GroupId));
+    }
+
+}

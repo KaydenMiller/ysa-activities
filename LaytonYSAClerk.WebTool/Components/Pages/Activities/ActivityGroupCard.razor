@@ -1,4 +1,6 @@
 ﻿@using LaytonYSAClerk.WebTool.Services
+@using MongoDB.Bson
+@inject NavigationManager NavigationManager
 
 <MudCard>
     <MudCardHeader>
@@ -15,13 +17,20 @@
         </ul>
     </MudCardContent>
     <MudCardActions>
-        <MudButton>Details</MudButton>
+        <MudButton OnClick="@(() => ActivityGroupDetails(Group.GroupId))">Details</MudButton>
     </MudCardActions>
 </MudCard>
 
 @code {
 
     [Parameter]
+    public ObjectId ActivityId { get; set; }
+    
+    [Parameter]
     public MemberGroup Group { get; set; } = null!;
 
+    private void ActivityGroupDetails(ObjectId id)
+    {
+        NavigationManager.NavigateTo($"/activities/{ActivityId.ToString()}/group/{id.ToString()}");
+    }
 }

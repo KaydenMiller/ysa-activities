@@ -68,8 +68,6 @@ public class MemberService
             m.Name.ApproximatelyEquals(searchParam, fuzzyOptions, FuzzyStringComparisonTolerance.Strong));
     }
 
-    
-    
     public async Task<ChurchActivity> FindActivityByName(string name)
     {
         _logger.LogInformation("Searching for Activity with name {ActivityName}", name);
@@ -100,68 +98,20 @@ public class MemberService
         var members = (await _memberRepository.GetMembersByIds(memberIds)).ToList();
         var membersToSeek = (await _memberRepository.GetMembers()).Except(members).ToList();
 
-        var groupFactory = new MemberGroupFactory(members);
+        var groupFactory = new MemberGroupFactory(members, membersToSeek);
         var groups = groupFactory.CreateGroups().ToList();
         
-        var buckets = membersToSeek.Count / groups.Count;
-        var shuffledMembersToSeek = membersToSeek.ToList();
-        var membersToSeekBucket = shuffledMembersToSeek.Chunk(buckets).ToList();
-
-        for (var groupIdx = 0; groupIdx < groups.Count; groupIdx++)
-        {
-            var group = groups[groupIdx] with
-            {
-                ObjectiveMembers = membersToSeekBucket[groupIdx]
-            };
+        foreach (var group in groups) {
             await _activityRepository.UpsertMemberGroup(activity.Id, group);
         }
 
         return true;
     }
 
-    public async Task<IEnumerable<MemberGroup>> GetPartners(string activityName)
+    public async Task DeleteActivity(string activityName)
     {
         var activity = await FindActivityByName(activityName);
-        if (activity.groups.Count == 0)
-        {
-            _logger.LogError("No groups created for {ActivityId} yet", activity.Id.ToString());
-            throw new Exception();
-        }
-        _logger.LogInformation("Found activity {ActivityId} for {ActivityName}", activity.Id.ToString(), activityName);
-        return activity.groups;
+        _logger.LogInformation("Deleting activity by the name {Name}", activityName);
+        await _activityRepository.DeleteActivity(activity.Id);
     }
-
-    public async Task<IEnumerable<ChurchMember>> GetMembersToSeek(string activityName)
-    {
-        var activity = await FindActivityByName(activityName);
-        if (activity.groups.Count == 0)
-        {
-            _logger.LogError("No groups created for {ActivityId} yet", activity.Id.ToString());
-            throw new Exception();
-        }
-
-        var availableMembers = (await _memberRepository.GetMembers())
-           .Where(m => !activity.JoinedMembers.Contains(m.ChruchMemberId));
-
-        return availableMembers;
-    }
-
-    // private async Task<IEnumerable<NamedMemberGroup>> ConvertMemberGroups(IEnumerable<MemberGroup> groups)
-    // {
-    //     List<NamedMemberGroup> namedMemberGroups = [];
-    //     foreach (var group in groups)
-    //     {
-    //         var groupMembers = await ConvertToMember(group.GroupMembers);
-    //         var objectiveMembers = await ConvertToMember(group.ObjectiveMembers);
-    //         namedMemberGroups.Add(new NamedMemberGroup(groupMembers, objectiveMembers));
-    //     }
-    //     return namedMemberGroups;
-    // }
-
-    // private async Task<IEnumerable<ChurchMember>> ConvertToMember(IEnumerable<long> memberIds)
-    // {
-    //     var members = await _memberRepository.GetMembers();
-    //     var groupMembers = members.Where(m => memberIds.Contains(m.ChruchMemberId));
-    //     return groupMembers;
-    // }
 }

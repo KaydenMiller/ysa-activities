@@ -4,6 +4,7 @@
 @inject MemberService MemberService
 @inject IDialogService DialogService
 @inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
 
 <MudContainer>
     <MudPaper>
@@ -19,7 +20,8 @@
                 <MudTd DataLabel="Name">@context.Name</MudTd>
                 <MudTd DataLabel="Created At">@DateTime.Today.ToString("d")</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudButton OnClick="@(() => GotoActivity(context.Name))">Goto</MudButton>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@(() => GotoActivity(context.Name))">Details</MudButton>
+                    <MudButton Color="Color.Error" Variant="Variant.Outlined" OnClick="@(() => OpenDeleteActivityDialog(context.Name))">Delete</MudButton>
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -28,7 +30,7 @@
     <MudIconButton Icon="@Icons.Material.Filled.Add" 
                    Color="Color.Primary"
                    Variant="Variant.Filled"
-                   Style="position: absolute; bottom: 50px; right: 50px;"
+                   Style="position: fixed; bottom: 50px; right: 50px;"
                    OnClick="OpenCreateActivityDialog"/>
 </MudContainer>
 
@@ -43,6 +45,7 @@
     private async Task GetActivities()
     {
         _activities = await MemberService.GetActivities();
+        StateHasChanged();
     }
     
     private async Task OpenCreateActivityDialog()
@@ -58,6 +61,20 @@
         if (!dialogResult!.Canceled)
         {
             await MemberService.CreateActivity(dialogResult.Data!.ToString()!);
+            await GetActivities();
+        }
+    }
+
+    private async Task OpenDeleteActivityDialog(string activityName)
+    {
+        var dialogRef = await DialogService.ShowMessageBox($"Delete Activity {activityName}?", "Are you sure you want to delete this activity?", "Yes", "No");
+
+        if (dialogRef is true)
+        {
+            // we want to delete the activity
+            await MemberService.DeleteActivity(activityName);
+            Snackbar.Add($"Activity {activityName} was deleted!", Severity.Success);
+            await GetActivities();
         }
     }
 

@@ -23,4 +23,8 @@
       <ProjectReference Include="..\Church.Ysa.Domain\Church.Ysa.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
+
 </Project>

@@ -49,15 +49,20 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await UpdateElements();
+    }
+
+    private async Task UpdateElements()
+    {
         ChurchActivity = await MemberService.FindActivityByName(ActivityName);
         var members = (await MemberService.GetMembers()).ToList();
         var availableMembers = members.Where(m => ChurchActivity.JoinedMembers.Contains(m.ChruchMemberId)).ToList();
         var droppableAvailableMembers = availableMembers.Select(m => new Droppable<ChurchMember> { Item = m, Dropzone = "Available" });
         var notAvailableMembers = members.Except(availableMembers)
-           .Select(m => new Droppable<ChurchMember>() { Item = m, Dropzone = "Not Available"});
+        .Select(m => new Droppable<ChurchMember>() { Item = m, Dropzone = "Not Available"});
 
         DroppableMembers = droppableAvailableMembers.Concat(notAvailableMembers);
-        
+
         StateHasChanged();
         _container.Refresh();
     }
@@ -67,7 +72,6 @@
         if (dropItem.Item is null)
             throw new Exception("Well that isn't good, please don't do that.");
         dropItem.Item.Dropzone = dropItem.DropzoneIdentifier;
-
 
         if (ChurchActivity is null) return;
 
@@ -79,9 +83,8 @@
         {
             await ActivityRepository.RemoveMemberFromActivity(dropItem.Item.Item.ChruchMemberId, ChurchActivity.Id);
         }
-        
-        StateHasChanged();
-        _container.Refresh();
+
+        await UpdateElements();
     }
 
     private async Task GenerateGroups()
