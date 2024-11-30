@@ -2,6 +2,7 @@
 @using LaytonYSAClerk.WebTool.Services
 @using MongoDB.Bson
 @inject ActivityRepository ActivityRepository
+@inject ISnackbar Snackbar
 
 <MudContainer>
     <MudPaper Elevation="2">
@@ -20,6 +21,11 @@
                 <li>@friend.Name</li>
             }
         </ul>
+        
+        <MudDivider />
+        
+        <MudTextField T="string" Label="Notes" @bind-Value="@Notes" AutoGrow Lines="3" HelperText="Information about your visits"></MudTextField>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateNotes">Save Notes</MudButton>
     </MudPaper>
 </MudContainer>
 
@@ -29,12 +35,24 @@
     public string ActivityId { get; set; }
     [Parameter]
     public string GroupId { get; set; }
+
+    public string Notes { get; set; } = "";
     
     private MemberGroup? Group { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         Group = await ActivityRepository.GetMemberGroup(ObjectId.Parse(ActivityId), ObjectId.Parse(GroupId));
+        Notes = Group?.Notes ?? "";
+    }
+
+    private async Task UpdateNotes()
+    {
+        await ActivityRepository.UpsertMemberGroup(ObjectId.Parse(ActivityId), Group! with
+        {
+            Notes = Notes
+        });
+        Snackbar.Add("Notes updated", Severity.Success);
     }
 
 }
