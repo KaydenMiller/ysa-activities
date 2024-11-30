@@ -6,46 +6,87 @@
 @inject ActivityRepository ActivityRepository
 @inject NavigationManager Navigation
 @inject ILogger<Activity> Logger
+@inject IDialogService DialogService
 
 <MudContainer>
     <MudPaper>
         <MudText Typo="Typo.h1">@(ChurchActivity?.Name ?? "")</MudText>
+
+        <MudDivider/>
+
+        <MudForm>
+            <MudText Typo="Typo.h5">Sign Up</MudText>
+            <MudText Typo="Typo.body1">Please enter your name in order to join the activity.</MudText>
+            <MudInput T="string"/>
+        </MudForm>
+
+        <MudDivider/>
         
-        <MudDivider />
-        
-        <MudDropContainer T="Droppable<ChurchMember>" @ref="_container" 
-                          Items="DroppableMembers"
-                          ItemsSelector="@((item, dropzone) => item.Dropzone == dropzone)"
-                          ItemDropped="@ItemUpdated"
-                          Class="d-flex flex-wrap flex-grow-1">
-            <ChildContent>
-                <MudDropZone T="Droppable<ChurchMember>" Identifier="Available" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
-                    <MudText Typo="Typo.h6">Available</MudText>
-                </MudDropZone>
-                <MudDropZone T="Droppable<ChurchMember>" Identifier="Not Available" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
-                    <MudText Typo="Typo.h6">Not Available</MudText>
-                </MudDropZone>
-            </ChildContent>
-            <ItemRenderer>
-                <MudPaper Elevation="25" Class="pa-2 my-4">@context.Item.Name</MudPaper>
-            </ItemRenderer>
-        </MudDropContainer>
-        
-        <div>
-            <MudButton Color="Color.Primary" OnClick="@(async () => await GenerateGroups())">Split Into Groups</MudButton>
-            <MudButton Color="Color.Primary" OnClick="@NavigateToGroups">View Groups</MudButton>
-        </div>
+        <MudGrid>
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.h4">Joined Members</MudText>
+                <MudDataGrid T="SimpleMember" Items="JoinedMembers">
+                    <Columns>
+                        <PropertyColumn Property="member => member.Name" Title="Name"/>
+                        <PropertyColumn Property="member => member.Gender" Title="Gender"/>
+                        <TemplateColumn>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                                               OnClick="@(async () => await RemoveMember(context.Item))">Remove
+                                    </MudButton>
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <MudText Typo="Typo.h4">Members to Fellowship</MudText>
+                <MudDataGrid T="SimpleMember" Items="MembersToFellowship">
+                    <Columns>
+                        <PropertyColumn Property="member => member.Name" Title="Name"/>
+                        <PropertyColumn Property="member => member.Gender" Title="Gender"/>
+                        <TemplateColumn>
+                            <CellTemplate>
+                                <MudStack Row>
+                                    <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                                               OnClick="@(async () => await RemoveMemberToFellowship(context.Item))">Remove
+                                    </MudButton>
+                                </MudStack>
+                            </CellTemplate>
+                        </TemplateColumn>
+                    </Columns>
+                </MudDataGrid>
+            </MudItem>
+        </MudGrid>
+
+
+        <MudButtonGroup Color="Color.Primary" Variant="Variant.Filled"
+                        OverrideStyles="false"
+                        Style="position: fixed; bottom: 50px; right: 50px;">
+            <MudButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Filled"
+                       OnClick="AddMember">Join
+            </MudButton>
+            <MudButton Icon="@Icons.Material.Filled.Add" Color="Color.Secondary" Variant="Variant.Filled"
+                       OnClick="AddMemberToFellowship">Add Fellowship
+            </MudButton>
+            <MudButton Icon="@Icons.Material.Filled.Group" Color="Color.Warning" Variant="Variant.Filled"
+                       OnClick="@(async () => await GenerateGroups())">Groups
+            </MudButton>
+        </MudButtonGroup>
     </MudPaper>
 </MudContainer>
 
 @code {
+
     [Parameter]
     public string ActivityName { get; set; } = null!;
 
-    private MudDropContainer<Droppable<ChurchMember>> _container = null!;
-
     public ChurchActivity? ChurchActivity = null!;
-    public IEnumerable<Droppable<ChurchMember>> DroppableMembers { get; set; } = [];
+
+    public IEnumerable<SimpleMember> JoinedMembers { get; set; }
+    public IEnumerable<SimpleMember> MembersToFellowship { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -55,35 +96,36 @@
     private async Task UpdateElements()
     {
         ChurchActivity = await MemberService.FindActivityByName(ActivityName);
-        var members = (await MemberService.GetMembers()).ToList();
-        var availableMembers = members.Where(m => ChurchActivity.JoinedMembers.Contains(m.ChruchMemberId)).ToList();
-        var droppableAvailableMembers = availableMembers.Select(m => new Droppable<ChurchMember> { Item = m, Dropzone = "Available" });
-        var notAvailableMembers = members.Except(availableMembers)
-        .Select(m => new Droppable<ChurchMember>() { Item = m, Dropzone = "Not Available"});
-
-        DroppableMembers = droppableAvailableMembers.Concat(notAvailableMembers);
-
+        JoinedMembers = ChurchActivity.JoinedMembers;
+        MembersToFellowship = ChurchActivity.MembersToFellowship;
         StateHasChanged();
-        _container.Refresh();
     }
 
-    private async Task ItemUpdated(MudItemDropInfo<Droppable<ChurchMember>> dropItem)
+    private async Task RemoveMember(SimpleMember member)
     {
-        if (dropItem.Item is null)
-            throw new Exception("Well that isn't good, please don't do that.");
-        dropItem.Item.Dropzone = dropItem.DropzoneIdentifier;
+        await ActivityRepository.RemoveMemberFromActivity(member, ChurchActivity!.Id);
+        await UpdateElements();
+    }
 
-        if (ChurchActivity is null) return;
+    private async Task AddMember()
+    {
+        var memberResult = await OpenMemberJoinDialog("Join Activity");
+        if (memberResult is null) return;
+        await ActivityRepository.AddMemberToActivity(memberResult, ChurchActivity!.Id);
+        await UpdateElements();
+    }
 
-        if (dropItem.DropzoneIdentifier is "Available")
-        {
-            await ActivityRepository.AddMemberToActivity(dropItem.Item.Item.ChruchMemberId, ChurchActivity.Id);
-        }
-        else
-        {
-            await ActivityRepository.RemoveMemberFromActivity(dropItem.Item.Item.ChruchMemberId, ChurchActivity.Id);
-        }
+    private async Task AddMemberToFellowship()
+    {
+        var memberResult = await OpenMemberJoinDialog("Add Member To Fellowship");
+        if (memberResult is null) return;
+        await ActivityRepository.AddFellowshipMemberToActivity(memberResult, ChurchActivity!.Id);
+        await UpdateElements();
+    }
 
+    private async Task RemoveMemberToFellowship(SimpleMember member)
+    {
+        await ActivityRepository.RemoveFellowshipMemberFromActivity(member, ChurchActivity!.Id);
         await UpdateElements();
     }
 
@@ -106,9 +148,28 @@
         Navigation.NavigateTo($"/activities/{ActivityName}/groups");
     }
 
-    public class Droppable<T> where T : class
+    private async Task<SimpleMember?> OpenMemberJoinDialog(string title)
     {
-        public string Dropzone { get; set; }
-        public T Item { get; init; }
+        var dialogParams = new DialogParameters<MemberJoinActivityDialog>
+        {
+            { x => x.ActivityName, ActivityName }
+        };
+
+        var dialog = await DialogService.ShowAsync<MemberJoinActivityDialog>(title, dialogParams, new DialogOptions
+        {
+            BackdropClick = false,
+            CloseOnEscapeKey = true,
+            FullScreen = false
+        });
+        var result = await dialog.Result;
+
+        if (!result!.Canceled)
+        {
+            var member = result.Data as SimpleMember;
+            return member;
+        }
+
+        return null;
     }
+
 }

@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson;
+﻿using Church.Ysa.Domain;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using MudBlazor.Extensions;
@@ -37,27 +38,47 @@ public class ActivityRepository
         return activities;
     }
 
-    public async Task<bool> AddMemberToActivity(long memberId, ObjectId activityId)
+    public async Task<bool> AddMemberToActivity(SimpleMember member, ObjectId activityId)
     {
-        _logger.LogInformation("Add Member {MemberId} to Activity {ActivityId}", memberId, activityId);
+        _logger.LogInformation("Add Member {MemberName} to Activity {ActivityId}", member.Name, activityId);
         var filter = Builders<ChurchActivity>.Filter.Eq("Id", activityId);
-        var update = Builders<ChurchActivity>.Update.Push(ca => ca.JoinedMembers, memberId);
+        var update = Builders<ChurchActivity>.Update.Push(ca => ca.JoinedMembers, member);
         await _database.GetCollection<ChurchActivity>(COLLECTION)
            .UpdateOneAsync(filter, update);
         return true;
     }
     
-    public async Task<bool> RemoveMemberFromActivity(long memberId, ObjectId activityId)
+    public async Task<bool> RemoveMemberFromActivity(SimpleMember member, ObjectId activityId)
     {
-        _logger.LogInformation("Remove Member {MemberId} to Activity {ActivityId}", memberId, activityId);
+        _logger.LogInformation("Remove Member {MemberName} to Activity {ActivityId}", member.Name, activityId);
         var filter = Builders<ChurchActivity>.Filter.Eq("Id", activityId);
-        var update = Builders<ChurchActivity>.Update.Pull(ca => ca.JoinedMembers, memberId);
+        var update = Builders<ChurchActivity>.Update.Pull(ca => ca.JoinedMembers, member);
         await _database.GetCollection<ChurchActivity>(COLLECTION)
            .UpdateOneAsync(filter, update);
         return true;
     }
     
-    public async Task<IEnumerable<long>> GetActivityMembers(ObjectId activityId)
+    public async Task<bool> AddFellowshipMemberToActivity(SimpleMember member, ObjectId activityId)
+    {
+        _logger.LogInformation("Add Member {MemberName} to Activity {ActivityId}", member.Name, activityId);
+        var filter = Builders<ChurchActivity>.Filter.Eq("Id", activityId);
+        var update = Builders<ChurchActivity>.Update.Push(ca => ca.MembersToFellowship, member);
+        await _database.GetCollection<ChurchActivity>(COLLECTION)
+           .UpdateOneAsync(filter, update);
+        return true;
+    }
+    
+    public async Task<bool> RemoveFellowshipMemberFromActivity(SimpleMember member, ObjectId activityId)
+    {
+        _logger.LogInformation("Remove Member {MemberName} to Activity {ActivityId}", member.Name, activityId);
+        var filter = Builders<ChurchActivity>.Filter.Eq("Id", activityId);
+        var update = Builders<ChurchActivity>.Update.Pull(ca => ca.MembersToFellowship, member);
+        await _database.GetCollection<ChurchActivity>(COLLECTION)
+           .UpdateOneAsync(filter, update);
+        return true;
+    }
+    
+    public async Task<IEnumerable<SimpleMember>> GetActivityMembers(ObjectId activityId)
     {
         var activity = await _database.GetCollection<ChurchActivity>(COLLECTION)
                .AsQueryable()
@@ -102,5 +123,14 @@ public class ActivityRepository
         _logger.LogInformation("Deleting activity with id {ActivityId}", activityId);
         await _database.GetCollection<ChurchActivity>(COLLECTION)
            .DeleteOneAsync(Builders<ChurchActivity>.Filter.Eq("_id", activityId));
+    }
+
+    public async Task ClearGroups(ObjectId activityId)
+    {
+        _logger.LogWarning("Someone cleared the groups");
+        await _database.GetCollection<ChurchActivity>(COLLECTION)
+           .UpdateOneAsync(
+                Builders<ChurchActivity>.Filter.Eq("_id", activityId),
+                Builders<ChurchActivity>.Update.Set(x => x.groups, []));
     }
 }

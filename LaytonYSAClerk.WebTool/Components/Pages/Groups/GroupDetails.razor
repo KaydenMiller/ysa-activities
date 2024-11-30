@@ -9,7 +9,7 @@
         <ul>
             @foreach (var member in Group?.GroupMembers ?? [])
             {
-                <li>@member.FullName</li>
+                <li>@member.Name</li>
             }
         </ul>
         
@@ -17,7 +17,7 @@
         <ul>
             @foreach (var friend in Group?.ObjectiveMembers ?? [])
             {
-                <li>@friend.FullName</li>
+                <li>@friend.Name</li>
             }
         </ul>
     </MudPaper>

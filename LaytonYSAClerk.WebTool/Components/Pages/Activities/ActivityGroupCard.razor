@@ -1,11 +1,13 @@
 ﻿@using LaytonYSAClerk.WebTool.Services
 @using MongoDB.Bson
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@inject ActivityRepository ActivityRepository
 
 <MudCard>
     <MudCardHeader>
         <MudText>
-            @(string.Join(", ", Group.GroupMembers.Select(m => m.FullName)))
+            @(string.Join(", ", Group.GroupMembers.Select(m => m.Name)))
         </MudText>
     </MudCardHeader>
     <MudCardContent>
@@ -21,6 +23,8 @@
     </MudCardActions>
 </MudCard>
 
+<MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="ClearAllGroups" Style="position: fixed; bottom: 50px; right: 50px;">Clear Groups</MudButton>
+
 @code {
 
     [Parameter]
@@ -28,6 +32,29 @@
     
     [Parameter]
     public MemberGroup Group { get; set; } = null!;
+
+    private async Task ClearAllGroups()
+    {
+        var dialog = await DialogService.ShowAsync<PasswordDialog>("Delete Groups Password", new DialogOptions()
+        {
+            FullScreen = false,
+            CloseOnEscapeKey = true,
+            BackdropClick = true
+        });
+        var result = await dialog.Result;
+
+        if (!result!.Canceled)
+        {
+            // check the password
+            var password = result.Data!.ToString();
+
+            if (password is "clear")
+            {
+                await ActivityRepository.ClearGroups(ActivityId);
+                NavigationManager.NavigateTo($"/activities");
+            }
+        }
+    }
 
     private void ActivityGroupDetails(ObjectId id)
     {

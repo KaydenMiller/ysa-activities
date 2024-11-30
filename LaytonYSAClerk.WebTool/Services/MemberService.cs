@@ -75,12 +75,6 @@ public class MemberService
         return activities.Single(m => m.Name == name);
     }
 
-    public async Task<bool> JoinActivity(ObjectId activityId, long memberId)
-    {
-        await _activityRepository.AddMemberToActivity(memberId, activityId);
-        return true;
-    }
-
     public async Task<bool> GeneratePartners(string activityName)
     {
         var activity = await FindActivityByName(activityName);
@@ -94,11 +88,10 @@ public class MemberService
 
         _logger.LogInformation("Generating new partners");
 
-        var memberIds = activity.JoinedMembers;
-        var members = (await _memberRepository.GetMembersByIds(memberIds)).ToList();
-        var membersToSeek = (await _memberRepository.GetMembers()).Except(members).ToList();
+        var members = activity.JoinedMembers;
+        var membersToFellowship = activity.MembersToFellowship;
 
-        var groupFactory = new MemberGroupFactory(members, membersToSeek);
+        var groupFactory = new MemberGroupFactory(members, membersToFellowship);
         var groups = groupFactory.CreateGroups().ToList();
         
         foreach (var group in groups) {

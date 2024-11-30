@@ -5,14 +5,19 @@ namespace LaytonYSAClerk.WebTool.Services;
 
 public class MemberGroupFactory
 {
-    private readonly IEnumerable<ChurchMember> _maleMembers;
-    private readonly IEnumerable<ChurchMember> _femaleMembers;
-    private readonly IEnumerable<ChurchMember> _maleFellowshipMembers;
-    private readonly IEnumerable<ChurchMember> _femaleFellowshipMembers;
+    private readonly IEnumerable<SimpleMember> _maleMembers;
+    private readonly IEnumerable<SimpleMember> _femaleMembers;
+    private readonly IEnumerable<SimpleMember> _maleFellowshipMembers;
+    private readonly IEnumerable<SimpleMember> _femaleFellowshipMembers;
     private const int IDEAL_GROUP_SIZE = 2;
 
-    public MemberGroupFactory(ICollection<ChurchMember> members, ICollection<ChurchMember> membersToFellowship)
+    public MemberGroupFactory(ICollection<SimpleMember> members, ICollection<SimpleMember> membersToFellowship)
     {
+        if (members is null || members.Count == 0)
+            throw new Exception("Members cannot be null or 0");
+        if (membersToFellowship is null || membersToFellowship.Count == 0)
+            throw new Exception("Members to fellowship cannot be null or 0");
+        
         _maleMembers = members.Where(m => m.Gender is Gender.Male);
         _femaleMembers = members.Where(m => m.Gender is Gender.Female);
 
@@ -34,8 +39,11 @@ public class MemberGroupFactory
         ];
     }
 
-    private IEnumerable<MemberGroup> GenerateGroups(ICollection<ChurchMember> members, ICollection<ChurchMember> membersToFellowship)
+    private IEnumerable<MemberGroup> GenerateGroups(ICollection<SimpleMember> members, ICollection<SimpleMember> membersToFellowship)
     {
+        if (members.Count == 0)
+            return [];
+        
         var remainingMembers = members.Count % IDEAL_GROUP_SIZE;
         var lastGroupedMemberIndex = (members.Count - 1) - remainingMembers;
         var nonGroupedMembers = members.ToList()[lastGroupedMemberIndex..];
@@ -77,6 +85,7 @@ public class MemberGroupFactory
         {
             var updatedMembersToFellowship = groups[groupIndex].ObjectiveMembers?.ToList() ?? [];
             updatedMembersToFellowship.Add(memberNotInGroup);
+            updatedMembersToFellowship = updatedMembersToFellowship.Distinct().ToList();
             groups[groupIndex] = groups[groupIndex] with
             {
                 ObjectiveMembers = updatedMembersToFellowship
@@ -87,7 +96,7 @@ public class MemberGroupFactory
         return groups;
     }
 
-    private ICollection<ChurchMember> ShuffleMembers(IList<ChurchMember> members)
+    private ICollection<SimpleMember> ShuffleMembers(IList<SimpleMember> members)
     {
         return members.Shuffle();
     }

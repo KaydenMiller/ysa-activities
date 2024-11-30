@@ -3,6 +3,13 @@ using MongoDB.Bson;
 
 namespace Church.Ysa.Domain;
 
+public class SimpleMember
+{
+    public string Name { get; set; }
+    public string Address { get; set; }
+    public Gender Gender { get; set; }
+}
+
 public class ChurchMember
 {
     [JsonIgnore]
