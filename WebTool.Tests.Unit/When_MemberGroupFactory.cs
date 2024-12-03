@@ -75,4 +75,63 @@ public class When_MemberGroupFactory
         result.Count.Should().Be(1);
         result[0].ObjectiveMembers?.Count().Should().Be(1);
     }
+
+    [Fact]
+    public void When_MultipleGroups_WithEvenFellowship()
+    {
+        List<SimpleMember> members =
+        [
+            new()
+            {
+                Name = "1",
+                Gender = Gender.Male
+            },
+            new()
+            {
+                Name = "2",
+                Gender = Gender.Male
+            },
+            new()
+            {
+                Name = "3",
+                Gender = Gender.Male
+            },
+            new()
+            {
+                Name = "4",
+                Gender = Gender.Male
+            }
+        ];
+        List<SimpleMember> fellowshipMembers = [
+            new()
+            {
+                Name = "1",
+                Gender = Gender.Male
+            },
+            new()
+            {
+                Name = "2",
+                Gender = Gender.Male
+            },
+            new()
+            {
+                Name = "3",
+                Gender = Gender.Male
+            },
+            new()
+            {
+                Name = "4",
+                Gender = Gender.Male
+            }
+        ];
+
+        var sut = new MemberGroupFactory(members, fellowshipMembers);
+        var groups = sut.CreateGroups().ToList();
+
+        groups.Count.Should().Be(2);
+        groups[0].GroupMembers.Count().Should().Be(2);
+        groups[0].ObjectiveMembers!.Count().Should().Be(2);
+        groups[1].GroupMembers.Count().Should().Be(2);
+        groups[1].ObjectiveMembers!.Count().Should().Be(2);
+    }
 }

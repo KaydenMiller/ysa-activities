@@ -1,43 +1,45 @@
 ﻿@page "/activities/{ActivityId}/group/{GroupId}"
 @using LaytonYSAClerk.WebTool.Services
 @using MongoDB.Bson
+@using LaytonYSAClerk.WebTool.Components.Shared
 @inject ActivityRepository ActivityRepository
 @inject ISnackbar Snackbar
 
 <MudContainer>
-    <MudPaper Elevation="2">
-        <MudText Typo="Typo.h2">Group Containing:</MudText>
-        <ul>
+    <MudPaper Elevation="2" Style="padding: 10px;">
+        <MudText Typo="Typo.h4">Group Containing</MudText>
+        <MudStack Style="padding-left: 25px;">
             @foreach (var member in Group?.GroupMembers ?? [])
             {
-                <li>@member.Name</li>
+                <MemberInfoBlock Name="@member.Name"/>
             }
-        </ul>
-        
-        <MudText Typo="Typo.h2">Members to Fellowship</MudText>
-        <ul>
+        </MudStack>
+
+        <MudText Typo="Typo.h4">Members to Fellowship</MudText>
+        <MudStack Style="padding-left: 25px;">
             @foreach (var friend in Group?.ObjectiveMembers ?? [])
             {
-                <li>@friend.Name</li>
+                <MemberInfoBlock Name="@friend.Name" Address="@friend.Address"/>
             }
-        </ul>
-        
-        <MudDivider />
-        
-        <MudTextField T="string" Label="Notes" @bind-Value="@Notes" AutoGrow Lines="3" HelperText="Information about your visits"></MudTextField>
+        </MudStack>
+        <MudDivider/>
+
+        <MudTextField T="string" Label="Notes" @bind-Value="@Notes" AutoGrow Lines="3"
+                      HelperText="Information about your visits"></MudTextField>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateNotes">Save Notes</MudButton>
     </MudPaper>
 </MudContainer>
 
 @code {
-    
+
     [Parameter]
     public string ActivityId { get; set; }
+
     [Parameter]
     public string GroupId { get; set; }
 
     public string Notes { get; set; } = "";
-    
+
     private MemberGroup? Group { get; set; }
 
     protected override async Task OnInitializedAsync()

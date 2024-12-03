@@ -1,4 +1,5 @@
 ﻿using Church.Ysa.Domain;
+using ListShuffle;
 using MongoDB.Bson;
 
 namespace LaytonYSAClerk.WebTool.Services;
@@ -45,7 +46,7 @@ public class MemberGroupFactory
             return [];
         
         var remainingMembers = members.Count % IDEAL_GROUP_SIZE;
-        var lastGroupedMemberIndex = (members.Count - 1) - remainingMembers;
+        var lastGroupedMemberIndex = members.Count - remainingMembers;
         var nonGroupedMembers = members.ToList()[lastGroupedMemberIndex..];
         var groups = members
            .ToList()[..^remainingMembers]
@@ -66,7 +67,7 @@ public class MemberGroupFactory
         }
 
         var fellowshipMembersRemaining = membersToFellowship.Count % groups.Count;
-        var lastFellowshipMemberIndex = membersToFellowship.Count - 1 - fellowshipMembersRemaining;
+        var lastFellowshipMemberIndex = membersToFellowship.Count - fellowshipMembersRemaining;
         var fellowshipMembersNotInAGroup = membersToFellowship.ToList()[lastFellowshipMemberIndex..];
         var fellowshipGroupSize = membersToFellowship.Count / groups.Count;
         var fellowshipGroups = membersToFellowship.Chunk(fellowshipGroupSize).ToList();
@@ -98,6 +99,8 @@ public class MemberGroupFactory
 
     private ICollection<SimpleMember> ShuffleMembers(IList<SimpleMember> members)
     {
-        return members.Shuffle();
+        var membersToShuffle = members.ToList();
+        membersToShuffle.CryptoStrongShuffle();
+        return membersToShuffle;
     }
 }

@@ -15,6 +15,13 @@
                 <MudSelectItem Value="@Gender.Male">Male</MudSelectItem>
                 <MudSelectItem Value="@Gender.Female">Female</MudSelectItem>
             </MudSelect>
+            @if (EnableAddress)
+            {
+                <MudTextField T="string"
+                              Label="Member Address"
+                              @bind-Value="address"
+                />
+            }
         </MudForm>
     </DialogContent>
     <DialogActions>
@@ -28,10 +35,14 @@
     string[] errors = [];
     MudForm form;
     string username;
+    string address;
     public Gender gender { get; set; } = Gender.Male;
 
     [Parameter]
     public string ActivityName { get; set; }
+
+    [Parameter]
+    public bool EnableAddress { get; set; } = false;
 
     [CascadingParameter]
     private MudDialogInstance MudDialog { get; set; }
@@ -40,7 +51,7 @@
     {
         Name = username,
         Gender = gender,
-        Address = ""
+        Address = address,
     }));
     public void Cancel() => MudDialog.Cancel();
 }

@@ -116,7 +116,7 @@
 
     private async Task AddMemberToFellowship()
     {
-        var memberResult = await OpenMemberJoinDialog("Add Member To Fellowship");
+        var memberResult = await OpenMemberJoinDialog("Add Member To Fellowship", true);
         if (memberResult is null) return;
         await ActivityRepository.AddFellowshipMemberToActivity(memberResult, ChurchActivity!.Id);
         await UpdateElements();
@@ -147,11 +147,12 @@
         Navigation.NavigateTo($"/activities/{ActivityName}/groups");
     }
 
-    private async Task<SimpleMember?> OpenMemberJoinDialog(string title)
+    private async Task<SimpleMember?> OpenMemberJoinDialog(string title, bool enableAddress = false)
     {
         var dialogParams = new DialogParameters<MemberJoinActivityDialog>
         {
-            { x => x.ActivityName, ActivityName }
+            { x => x.ActivityName, ActivityName },
+            { x => x.EnableAddress, enableAddress },
         };
 
         var dialog = await DialogService.ShowAsync<MemberJoinActivityDialog>(title, dialogParams, new DialogOptions
