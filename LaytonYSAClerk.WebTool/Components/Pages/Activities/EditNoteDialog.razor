@@ -1,0 +1,64 @@
+﻿@using System.Diagnostics
+@using Church.Ysa.Domain
+
+<MudDialog>
+    <TitleContent>Notes for @Member.Name</TitleContent>
+    <DialogContent>
+        <MudSelect T="string"
+                   @bind-Value="_noteType"
+                   SelectedValuesChanged="OnSelectChange"
+                   Label="Note Type"
+                   Placeholder="Please Select"
+                   AdornmentIcon="@Icons.Material.Filled.Flag">
+            <MudSelectItem Value="@("home")">Not Home</MudSelectItem>
+            <MudSelectItem Value="@("interest")">Not Interested</MudSelectItem>
+            <MudSelectItem Value="@("accepted")">Accepted Invite</MudSelectItem>
+            <MudSelectItem Value="@("other")">Other (please provide)</MudSelectItem>
+        </MudSelect>
+        @if (_showOther)
+        {
+            <MudTextField T="string"
+                          Label="Note"
+                          Required="true"
+                          RequiredError="A note is required in order to save"
+                          @bind-Value="_note"/>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private string _noteType = "home";
+    private string _note = "";
+    private bool _showOther = false;
+
+    [Parameter]
+    public SimpleMember Member { get; set; }
+
+    [CascadingParameter]
+    private MudDialogInstance MudDialog { get; set; } = null!;
+
+    private void OnSelectChange(IEnumerable<string> selectedValues)
+    {
+        var noteType = selectedValues.First();
+        _showOther = noteType is "other";
+    }
+
+    private string GetNoteString()
+    {
+        return _noteType switch
+        {
+            "home" => "The member was not home.",
+            "interest" => "The member was not interested.",
+            "accepted" => "The member accepted the invite.",
+            "other" => _note,
+            _ => throw new UnreachableException("Not sure how you did this")
+        };
+    }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(GetNoteString()));
+    private void Cancel() => MudDialog.Cancel();
+}

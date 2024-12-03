@@ -96,16 +96,6 @@ public class ActivityRepository
         return group;
     }
 
-    public async Task<string> GetGroupNotes(ObjectId activityId, ObjectId groupId)
-    {
-        
-        var activity = await _database.GetCollection<ChurchActivity>(COLLECTION)
-           .AsQueryable()
-           .SingleOrDefaultAsync(a => a.Id == activityId);
-        var group = activity.groups.SingleOrDefault(g => g.GroupId == groupId);
-        return group?.Notes ?? "";
-    }
-
     public async Task UpsertMemberGroup(ObjectId activityId, MemberGroup memberGroup)
     {
         _logger.LogInformation("Upsert Member Group in mongo");

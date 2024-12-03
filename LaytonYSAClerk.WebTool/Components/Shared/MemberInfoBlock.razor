@@ -1,20 +1,66 @@
-﻿
-<MudStack Row AlignItems="AlignItems.Center" Spacing="3">
-    <MudAvatar Elevation="2" >
+﻿@using Church.Ysa.Domain
+@using LaytonYSAClerk.WebTool.Components.Pages.Activities
+@using LaytonYSAClerk.WebTool.Services
+@inject IDialogService DialogService
+@inject ActivityRepository ActivityRepository
+
+<MudStack Row AlignItems="AlignItems.Center">
+    <MudAvatar Elevation="2">
         <MudIcon Color="Color.Dark" Icon="@Icons.Material.Filled.Person"></MudIcon>
     </MudAvatar>
     <MudStack Spacing="0">
-        <MudText Typo="Typo.h6">@Name</MudText>
-        <MudText Typo="Typo.caption">@Address</MudText>
+        <MudText Typo="Typo.h6">@Member.Name</MudText>
+        <MudText Typo="Typo.caption">@Member.Address</MudText>
     </MudStack>
+    @if (Edit)
+    {
+        <MudStack>
+            <MudIconButton Color="Color.Secondary"
+                           Variant="Variant.Filled"
+                           Icon="@Icons.Material.Filled.EditNote"
+                           OnClick="EditUserNote"></MudIconButton>
+        </MudStack>
+    }
 </MudStack>
 
 @code {
 
     [Parameter]
-    public string Name { get; set; } = "";
+    public SimpleMember Member { get; set; }
 
     [Parameter]
-    public string Address { get; set; } = "";
+    public bool Edit { get; set; } = false;
+
+    [Parameter]
+    public EventCallback<MemberNote> OnNoteUpdated { get; set; }
+
+    private async Task EditUserNote()
+    {
+        var note = await OpenNoteEditDialog();
+        await OnNoteUpdated.InvokeAsync(new MemberNote(Member, note));
+    }
+
+    private async Task<string> OpenNoteEditDialog()
+    {
+        var dialogParams = new DialogParameters<EditNoteDialog>()
+        {
+            { x => x.Member, Member }
+        };
+        var dialog = await DialogService.ShowAsync<EditNoteDialog>("Edit Note", dialogParams, new DialogOptions()
+        {
+            BackdropClick = false,
+            CloseOnEscapeKey = true,
+            FullScreen = false
+        });
+        var result = await dialog.Result;
+
+        if (!result!.Canceled)
+        {
+            var note = result.Data as string;
+            return note ?? "";
+        }
+
+        return "";
+    }
 
 }

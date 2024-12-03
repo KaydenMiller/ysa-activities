@@ -51,7 +51,7 @@ public class MemberGroupFactory
         var groups = members
            .ToList()[..^remainingMembers]
            .Chunk(IDEAL_GROUP_SIZE)
-           .Select(m => new MemberGroup(ObjectId.GenerateNewId(), m, [], ""))
+           .Select(m => new MemberGroup(ObjectId.GenerateNewId(), m, [], []))
            .ToList();
 
         if (remainingMembers > 0)

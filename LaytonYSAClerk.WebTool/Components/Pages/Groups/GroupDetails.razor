@@ -11,7 +11,7 @@
         <MudStack Style="padding-left: 25px;">
             @foreach (var member in Group?.GroupMembers ?? [])
             {
-                <MemberInfoBlock Name="@member.Name"/>
+                <MemberInfoBlock Member="member" />
             }
         </MudStack>
 
@@ -19,14 +19,21 @@
         <MudStack Style="padding-left: 25px;">
             @foreach (var friend in Group?.ObjectiveMembers ?? [])
             {
-                <MemberInfoBlock Name="@friend.Name" Address="@friend.Address"/>
+                <MemberInfoBlock Member="friend" OnNoteUpdated="UpdateNote" Edit="true"/>
             }
         </MudStack>
         <MudDivider/>
-
-        <MudTextField T="string" Label="Notes" @bind-Value="@Notes" AutoGrow Lines="3"
-                      HelperText="Information about your visits"></MudTextField>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateNotes">Save Notes</MudButton>
+        
+        <MudText Typo="Typo.h4">Notes</MudText>
+        <MudStack>
+            @foreach (var note in Group?.Notes ?? [])
+            {
+                <div>
+                    <MudText Typo="@Typo.subtitle1">@note.Member.Name</MudText>
+                    <MudText Typo="Typo.body1">@note.Note</MudText>
+                </div>
+            }
+        </MudStack>
     </MudPaper>
 </MudContainer>
 
@@ -38,23 +45,30 @@
     [Parameter]
     public string GroupId { get; set; }
 
-    public string Notes { get; set; } = "";
-
     private MemberGroup? Group { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        Group = await ActivityRepository.GetMemberGroup(ObjectId.Parse(ActivityId), ObjectId.Parse(GroupId));
-        Notes = Group?.Notes ?? "";
+        await RefreshData();
     }
 
-    private async Task UpdateNotes()
+    private async Task RefreshData()
     {
+        Group = await ActivityRepository.GetMemberGroup(ObjectId.Parse(ActivityId), ObjectId.Parse(GroupId));
+    }
+
+    private async Task UpdateNote(MemberNote note)
+    {
+        var currentNotes = Group!.Notes;
+        List<MemberNote> updatedNotes = [
+            ..currentNotes,
+            note
+        ];
         await ActivityRepository.UpsertMemberGroup(ObjectId.Parse(ActivityId), Group! with
         {
-            Notes = Notes
+            Notes = updatedNotes
         });
         Snackbar.Add("Notes updated", Severity.Success);
+        await RefreshData();
     }
-
 }
