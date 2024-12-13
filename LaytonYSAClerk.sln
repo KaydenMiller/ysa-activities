@@ -10,6 +10,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Church.Ysa.Domain", "Church
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebTool.Tests.Unit", "WebTool.Tests.Unit\WebTool.Tests.Unit.csproj", "{44FCFB20-EB02-4DD0-AB08-C9E5953E2E96}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YsaActivities.Api", "YsaActivities.Api\YsaActivities.Api.csproj", "{2299A052-D5A9-49A6-B08B-1588050A66F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KaydenMiller.ApiTools", "KaydenMiller.ApiTools\KaydenMiller.ApiTools.csproj", "{0AD7AC74-A823-4E09-9393-28D3B4E6F8A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{44FCFB20-EB02-4DD0-AB08-C9E5953E2E96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44FCFB20-EB02-4DD0-AB08-C9E5953E2E96}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44FCFB20-EB02-4DD0-AB08-C9E5953E2E96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2299A052-D5A9-49A6-B08B-1588050A66F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2299A052-D5A9-49A6-B08B-1588050A66F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2299A052-D5A9-49A6-B08B-1588050A66F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2299A052-D5A9-49A6-B08B-1588050A66F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AD7AC74-A823-4E09-9393-28D3B4E6F8A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AD7AC74-A823-4E09-9393-28D3B4E6F8A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AD7AC74-A823-4E09-9393-28D3B4E6F8A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AD7AC74-A823-4E09-9393-28D3B4E6F8A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
